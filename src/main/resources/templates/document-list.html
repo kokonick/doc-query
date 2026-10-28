@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-bs-theme="auto">
+<head>
+    <th:block th:replace="~{layout/app-template :: html_head}"></th:block>
+    <title>Doc Query</title>
+</head>
+<body>
+<th:block th:replace="~{layout/app-template :: theme_panel}">
+</th:block>
+
+<th:block th:replace="~{layout/app-template :: dashboard_icons}">
+</th:block>
+
+<th:block th:replace="~{layout/app-template :: dashboard_main_header}">
+</th:block>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <th:block th:replace="~{layout/app-template :: dashboard_left_nav}">
+        </th:block>
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h2>List of documents</h2>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-middle align-items-center">
+                    <!--<h3 class="mb-0 fs-5"></h3>-->
+                    <!-- Bulk Action Button -->
+                    <button id="btnBulkDelete" class="btn btn-sm btn-danger border-light d-none"
+                            onclick="processSelectedRows()">
+                        Delete Selected (<span id="selectedCount">0</span>)
+                    </button>
+                </div>
+                <div class="card-body">
+                    <form class="row g-3"  id="docFormList" method="post" th:action="@{/allDocuments}" >
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-bordered align-middle">
+                            <thead class="table-dark">
+                            <tr>
+                                <!-- Master Select All Checkbox Header Column -->
+                                <th scope="col" class="text-center" style="width: 5%">
+                                    <input class="form-check-input" type="checkbox" id="selectAll">
+                                </th>
+                                <th scope="col">ID</th>
+                                <th scope="col">Title</th>
+                                <th scope="col">File Name</th>
+                                <th scope="col">Date Created</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="document, documentStat : ${documents}">
+                                <!-- Individual Row Selection Checkbox Cell -->
+                                <td class="text-center">
+                                    <input class="form-check-input row-checkbox" type="checkbox" name="ids"
+                                           th:value="${document.id}">
+                                </td>
+                                <!--<th scope="row" th:text="${documentStat.count}">1</th>-->
+                                <td th:text="${document.id}">USR-101</td>
+                                <td> <a th:href="@{/queryDocument/{id}(id=${document.id})}" th:text="${document.title}">Doc Title</a></td>
+                                <td th:text="${document.fileName}">Doe</td>
+                                <td th:text="${document.createdAt}">john.doe@example.com</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(documents)}">
+                                <td colspan="6" class="text-center text-muted py-3">No documents found.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!--<form class="row g-3" th:object="${changePassword}" method="post" th:action="@{/app/updatePassword}">
+                <div class="col-md-4">
+                    <div class="mb-1">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" placeholder="Current password"
+                               th:field="*{currentPassword}"
+                               th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid' : ''">
+                        <p th:if="${#fields.hasErrors('currentPassword')}"
+                           th:text="${#strings.listJoin(#fields.errors('currentPassword'), ', ')}"
+                           class="invalid-feedback">Current password validation error
+                            message(s).
+                        </p>
+                    </div>
+                    <div class="mb-1">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" placeholder="New Password"
+                               th:field="*{password}"
+                               th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''">
+                        <p th:if="${#fields.hasErrors('password')}"
+                           th:text="${#strings.listJoin(#fields.errors('password'), ', ')}"
+                           class="invalid-feedback">New password validation error
+                            message(s).</p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPasswordConfirm" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="newPasswordConfirm"
+                               placeholder="Confirm Password"
+                               th:field="*{passwordConfirm}"
+                               th:classappend="${#fields.hasErrors('passwordConfirm')} ? 'is-invalid' : ''" required/>
+                        <ul th:if="${#fields.hasErrors('passwordConfirm')}" class="invalid-feedback " style="list-style-type: none; padding: 0; margin: 0;">
+                            <li th:each="err : ${#fields.errors('passwordConfirm')}" th:text="${err}"/>
+                        </ul>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary mb-3">Update Password</button>
+                    </div>
+                </div>
+            </form>-->
+
+
+        </main>
+    </div>
+</div>
+<th:block th:replace="~{layout/main-template :: docquery_script}"></th:block>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const selectAllCheckbox = document.getElementById("selectAll");
+        const rowCheckboxes = document.querySelectorAll(".row-checkbox");
+        const bulkDeleteBtn = document.getElementById("btnBulkDelete");
+        const selectedCountSpan = document.getElementById("selectedCount");
+
+        // Function to update the visibility and counter of the bulk button
+        function updateBulkButton() {
+            const checkedCount = document.querySelectorAll(".row-checkbox:checked").length;
+
+            if (checkedCount > 0) {
+                bulkDeleteBtn.classList.remove("d-none");
+                selectedCountSpan.textContent = checkedCount;
+            } else {
+                bulkDeleteBtn.classList.add("d-none");
+            }
+
+            // Sync Master checkbox state if all rows are manually ticked
+            selectAllCheckbox.checked = (checkedCount === rowCheckboxes.length && rowCheckboxes.length > 0);
+        }
+
+        // Master "Select All" event logic
+        selectAllCheckbox.addEventListener("change", function () {
+            rowCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+            updateBulkButton();
+        });
+
+        // Individual row event logic
+        rowCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener("change", updateBulkButton);
+        });
+    });
+
+    // Mock processing utility (Example endpoint connector)
+    function processSelectedRows() {
+        const selectedIds = Array.from(document.querySelectorAll(".row-checkbox:checked"))
+            .map(cb => cb.value);
+
+        if (selectedIds.length > 0) {
+            //alert("Sending Selected record IDs to backend: " + JSON.stringify(selectedIds));
+            const userResponse = confirm("Are you sure you want to delete selected documents?");
+            if (userResponse) {
+                const form = document.getElementById('docFormList');
+                form.submit();
+            }
+        }
+    }
+</script>
+</body>
+</html>

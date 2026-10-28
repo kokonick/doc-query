@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-bs-theme="auto">
+<head>
+    <th:block th:replace="~{layout/app-template :: html_head}"></th:block>
+    <title>Doc Query</title>
+</head>
+<body>
+<th:block th:replace="~{layout/app-template :: theme_panel}">
+</th:block>
+
+<th:block th:replace="~{layout/app-template :: dashboard_icons}">
+</th:block>
+
+<th:block th:replace="~{layout/app-template :: dashboard_main_header}">
+</th:block>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <th:block th:replace="~{layout/app-template :: dashboard_left_nav}">
+        </th:block>
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h2>Ask a question related to the document : <span th:text="${queryForm.title}"> Doc title!</span></h2>
+            </div>
+            <div th:if="${successMessage != null}" class="row col-md-4 alert alert-success alert-dismissible fade show" >
+                <span th:text="${successMessage}">Successful!</span>
+                <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close"
+                ></button>
+            </div>
+            <form class="row g-3" id="queryForm" th:object="${queryForm}" method="post" th:action="@{/queryDocument}"
+                  enctype="multipart/form-data">
+                <input type="hidden" th:field="*{documentId}"  />
+                <!--<h3 class="mb-0 fs-5" th:text="${queryForm.documentId}"></h3>-->
+
+                <div class="col-md-4">
+                    <div class="mb-1">
+                        <label for="query" class="form-label">Question</label>
+                        <input type="text" class="form-control" id="query" placeholder="Ask question concerning the document"
+                               th:field="*{query}"
+                               th:classappend="${#fields.hasErrors('query')} ? 'is-invalid' : ''">
+                        <p th:if="${#fields.hasErrors('query')}"
+                           th:text="${#strings.listJoin(#fields.errors('query'), ', ')}"
+                           class="invalid-feedback">Query error
+                            message(s).
+                        </p>
+                    </div>
+
+                    <div class="col-auto">
+                        <button id="submitBtn" type="submit" class="btn btn-primary mb-3">Submit Query</button>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+</div>
+<th:block th:replace="~{layout/main-template :: docquery_script}"></th:block>
+<script>
+    const form = document.getElementById('queryForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', function(event) {
+        // 1. Disable the button so it can't be clicked again
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Submitting...";
+
+        // 2. Optional: If you are handling the submit via fetch/AJAX,
+        // you would call event.preventDefault() here.
+    });
+</script>
+</body>
+</html>

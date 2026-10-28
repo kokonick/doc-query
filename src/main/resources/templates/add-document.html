@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-bs-theme="auto">
+<head>
+    <th:block th:replace="~{layout/app-template :: html_head}"></th:block>
+    <title>Doc Query</title>
+</head>
+<body>
+<th:block th:replace="~{layout/app-template :: theme_panel}">
+</th:block>
+
+<th:block th:replace="~{layout/app-template :: dashboard_icons}">
+</th:block>
+
+<th:block th:replace="~{layout/app-template :: dashboard_main_header}">
+</th:block>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <th:block th:replace="~{layout/app-template :: dashboard_left_nav}">
+        </th:block>
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h2>List of documents available</h2>
+            </div>
+            <div th:if="${successMessage != null}" class="row col-md-4 alert alert-success alert-dismissible fade show" >
+                <span th:text="${successMessage}">Successful!</span>
+                <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close"
+                ></button>
+            </div>
+            <form class="row g-3" th:object="${documentForm}" method="post" th:action="@{/document}"
+                  enctype="multipart/form-data">
+                <div class="col-md-4">
+                    <div class="mb-1">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" placeholder="Document title"
+                               th:field="*{title}"
+                               th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''">
+                        <p th:if="${#fields.hasErrors('title')}"
+                           th:text="${#strings.listJoin(#fields.errors('title'), ', ')}"
+                           class="invalid-feedback">Title error
+                            message(s).
+                        </p>
+                    </div>
+                    <div class="mb-1">
+                        <label for="file" class="form-label">Document</label>
+                        <input type="file" class="form-control" id="file" placeholder="File to upload"
+                               th:field="*{file}"
+                               th:classappend="${#fields.hasErrors('file')} ? 'is-invalid' : ''">
+                        <p th:if="${#fields.hasErrors('file')}"
+                           th:text="${#strings.listJoin(#fields.errors('file'), ', ')}"
+                           class="invalid-feedback">File upload error
+                            message(s).</p>
+                    </div>
+
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary mb-3">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+</div>
+<th:block th:replace="~{layout/main-template :: docquery_script}"></th:block>
+</body>
+</html>
